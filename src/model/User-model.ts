@@ -15,22 +15,22 @@ const MessageSchema:Schema<Messages> = new Schema({
     createdAt:{
         type:Date,
         required:true,
-        default:Date.now()
+        default:Date.now
     }
     ,
     updatedAt:{
         type:Date,
         required:true,
-        default:Date.now()
+        default:Date.now
     }
 });
 
 export interface User extends Document{
-    name:String,
-    username:String,
-    email:String,
-    password:String,
-    verifyCode:String,
+    name:string,
+    username:string,
+    email:string,
+    password:string,
+    verifyCode:string,
     isVerified:boolean,
     verifyCodeExpiry:Date,
     isAcceptingMessages:boolean,
@@ -44,22 +44,22 @@ const UserSchema:Schema<User>= new Schema({
 
     name:{
         type:String,
-        toLowerCase:true,
+        lowercase:true,
         required:[true,"Name is required"]
 
     },
     email:{
         type:String,
-        toLowerCase:true,
-        unique:[true,"Email should be unique"],
+        lowercase:true,
+        unique:true,
         required:[true,"Email is required"],
           match: [/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/, "Please enter a valid email address"],
 
     },
     username:{
         type:String,
-        toLowerCase:true,
-       unique:[true,"Username should be unique"],
+        lowercase:true,
+       unique:true,
         required:[true,"Username is required"],
         trim:true
 
@@ -94,13 +94,13 @@ const UserSchema:Schema<User>= new Schema({
     createdAt:{
         type:Date,
         required:true,
-        default:Date.now()
+        default:Date.now
     }
     ,
     updatedAt:{
         type:Date,
         required:true,
-        default:Date.now()
+        default:Date.now
     }
 })
 

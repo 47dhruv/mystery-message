@@ -2,21 +2,24 @@
             import userModel from "@/model/User-model";
             import bcrypt from "bcryptjs";
             import { sendVerificationEmail } from "@/helpers/sendVerificationEmail";
-            import { ApiResponse } from "@/types/apiResponse";
+            
 
-            export async function POST(request: Request): Promise<ApiResponse> {
+            export async function POST(request: Request) {
                 await dbConnect();
                 try {
-                    const { username, email, password } = await request.json()
+                    const { name,username, email, password } = await request.json()
                     const existingUserVerifiedByUsername = await userModel.findOne({
                         username,
                         isVerified: true
                     })
 
 
-                    
+
                     if (existingUserVerifiedByUsername) {
-                        return { success: true, message: "user Already exist", status: 200 }
+                        return Response.json( 
+                        { success: false, message: "user Already exist",},
+                        { status: 400 }
+                    )
                     }
 
                     const exisitngUserByEmail = await userModel.findOne({ email })
@@ -25,12 +28,17 @@
 
                     if (exisitngUserByEmail) {
                         if (exisitngUserByEmail.isVerified) {
-                            return { success: false, message: " User already exist with this email ", status: 500 }
+                            return Response.json( 
+                        { success: false, message: "User already exist with this email ",},
+                        { status: 500})
+                            
                         } else {
                             const hashedPasswoord = await bcrypt.hash(password, 10);
+                            const expiryDate = new Date();
+                        expiryDate.setHours(expiryDate.getHours() + 3)
                             exisitngUserByEmail.password = hashedPasswoord;
                             exisitngUserByEmail.verifyCode = verifyCode;
-                            exisitngUserByEmail.verifyCodeExpiry = new Date(Date.now() * (3 * 3600000));
+                            exisitngUserByEmail.verifyCodeExpiry = expiryDate;
                             await exisitngUserByEmail.save()
                         }
 
@@ -43,17 +51,15 @@
                         expiryDate.setHours(expiryDate.getHours() + 3)
 
                         const newUser = new userModel({
-                            name: String,
-                            username:
+                            name,
+                            username,
                                 email,
                             password: hashedPasswoord,
                             verifyCode: verifyCode,
                             isVerified: false,
                             verifyCodeExpiry: expiryDate,
                             isAcceptingMessages: true,
-                            message: [],
-                            createdAt: Date.now(),
-                            updatedAt: Date.now(),
+                            message: []
 
 
                         })
@@ -68,14 +74,23 @@
                         verifyCode,
                     )
                     if (!emailResponse.success) {
-                        return { success: false, message: emailResponse.message, status: 500 }
+                         return Response.json( 
+                        { success: false, message: emailResponse.message,},
+                        { status: 500})
+                    
                     }
 
+                       return Response.json( 
+                        { success: true, message: "User registering Sucessfully Or please verify email"},
+                        { status: 200})
 
-
-                    return { success: true, message: "User regestering Sucessfully Or please verify email", status: 200 }
+                    
                 } catch (error) {
-                    console.error("Error regesetring User")
-                    return { success: false, message: "Error regestering User", status: 500 }
+                    console.error("Error regesetring User",error)
+                     return Response.json( 
+                        { success: false, message: "Error registering User ",},
+                        { status: 500})
+                    
+                    
                 }
             }
